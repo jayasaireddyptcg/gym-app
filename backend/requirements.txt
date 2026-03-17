@@ -6,8 +6,6 @@ email-validator
 python-jose[cryptography]
 passlib[bcrypt,argon2]
 boto3
-torch
-torchvision
 numpy
 pillow
 sqlalchemy>=1.4.0

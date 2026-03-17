@@ -2,11 +2,11 @@ import axios from "axios";
 import { tokenStorage } from "../utils/tokenStorage";
 import * as ImagePicker from 'expo-image-picker';
 
-export const API_URL = "https://exp://172.20.10.2:8081/";
+export const API_URL = "http://172.20.10.2:8000/";
 
 export const api = axios.create({
   baseURL: __DEV__ 
-    ? 'https://exp://172.20.10.2:8081/'
+    ? 'http://172.20.10.2:8000/'
     : API_URL,
   headers: {
     "Content-Type": "application/json",

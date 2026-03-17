@@ -148,7 +148,7 @@ htmlcov/
 *.pkl
 *.pickle
 *.joblib
-models/
+
 checkpoints/
 
 # AWS

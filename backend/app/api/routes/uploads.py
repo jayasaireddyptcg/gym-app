@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from app.database.session import get_db
 from app.models.user import User
-from app.services.s3 import generate_presigned_upload_url, upload_avatar_to_s3, test_s3_connection
+from app.services.s3 import generate_presigned_upload_url, upload_avatar_to_s3, test_s3_connection, generate_presigned_get_url
 from app.core.deps import get_current_user
 from app.core.config import settings
 
@@ -53,3 +53,25 @@ def upload_avatar(
         "avatar_key": avatar_key,
         "avatar_url": avatar_url,
     }
+
+
+# ------------------------
+# Get presigned GET URL for viewing
+# ------------------------
+@router.get("/presigned-url/{image_key:path}")
+def get_presigned_url(
+    image_key: str,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Generate a presigned GET URL for viewing an image stored in S3.
+    The image_key should be the full S3 key (e.g., 'equipment-scans/uuid.jpg')
+    """
+    try:
+        presigned_url = generate_presigned_get_url(image_key, expires_in=3600)
+        return {
+            "presigned_url": presigned_url,
+            "expires_in": 3600
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate presigned URL: {str(e)}")

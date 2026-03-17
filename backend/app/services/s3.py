@@ -62,6 +62,30 @@ def generate_presigned_upload_url(
 
 
 # -------------------------
+# PRESIGNED GET URL (for viewing)
+# -------------------------
+def generate_presigned_get_url(
+    key: str,
+    expires_in: int = 3600,
+) -> str:
+    """
+    Generates a presigned GET URL for viewing/downloading an image.
+    """
+    try:
+        url = s3.generate_presigned_url(
+            ClientMethod="get_object",
+            Params={
+                "Bucket": BUCKET_NAME,
+                "Key": key,
+            },
+            ExpiresIn=expires_in,
+        )
+        return url
+    except ClientError as e:
+        raise RuntimeError(f"Failed to generate presigned GET URL: {e}")
+
+
+# -------------------------
 # LOAD IMAGE FOR AI
 # -------------------------
 def load_image_from_s3(key: str) -> Image.Image:

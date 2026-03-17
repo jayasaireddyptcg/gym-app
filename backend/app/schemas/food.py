@@ -1,6 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 from typing import List, Optional
 from datetime import datetime, date
+from app.services.s3 import generate_presigned_get_url
+from app.core.config import settings
 
 # Food Item schemas
 class FoodItemBase(BaseModel):
@@ -82,6 +84,30 @@ class FoodScan(FoodScanBase):
     user_id: int
     scan_date: datetime
     created_at: datetime
+
+    @field_serializer('image_url')
+    def serialize_image_url(self, image_url: str) -> str:
+        """Convert S3 URL to presigned URL if it's an S3 key"""
+        # Check if it's already a presigned URL (contains query params)
+        if '?' in image_url and 'Signature' in image_url:
+            return image_url
+        
+        # Check if it's a full S3 URL
+        if image_url.startswith('https://'):
+            # Extract the S3 key from the URL
+            bucket_url = f"https://{settings.aws_bucket_name}.s3.{settings.aws_region}.amazonaws.com/"
+            if image_url.startswith(bucket_url):
+                s3_key = image_url.replace(bucket_url, '')
+                try:
+                    return generate_presigned_get_url(s3_key, expires_in=3600)
+                except:
+                    return image_url
+        
+        # If it's just a key, generate presigned URL
+        try:
+            return generate_presigned_get_url(image_url, expires_in=3600)
+        except:
+            return image_url
 
     class Config:
         from_attributes = True
